@@ -1,2 +1,2 @@
-# MTCN-model
-Trying to learn and implemt MTCN model 
+# MCTN-model
+Trying to learn and implemt MCTN model 
