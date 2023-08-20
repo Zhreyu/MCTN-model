@@ -72,4 +72,4 @@ class Node:
         
         value = self.game.get_opponent_value(value)
         if self.parent is not None:
-            self.parent.backpropagate(value)  
+            self.parent.backpropagate(value)
