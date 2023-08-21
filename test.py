@@ -2,27 +2,21 @@ import matplotlib.pyplot as plt
 import torch
 from TicTacToe import TicTacToe
 from ResNet import ResNet
+from engine import engine
+
 tictactoe = TicTacToe()
-
-state = tictactoe.get_initial_state()
-state = tictactoe.get_next_state(state, 2, 1)
-state = tictactoe.get_next_state(state, 7, -1)
-
-print(state)
-
-encoded_state = tictactoe.get_encoded_state(state)
-
-print(encoded_state)
-
-tensor_state = torch.tensor(encoded_state).unsqueeze(0)
-
 model = ResNet(tictactoe, 4, 64)
 
-policy, value = model(tensor_state)
-value = value.item()
-policy = torch.softmax(policy, axis=1).squeeze(0).detach().numpy()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-print(value, policy)
+args = {
+    'C': 2,
+    'num_searches': 60,
+    'num_iterations': 3,
+    'num_selfPlay_iterations': 500,
+    'num_epochs': 10,
+    'batch_size': 64
+}
 
-plt.bar(range(tictactoe.action_size), policy)
-plt.show()
+mctn = engine(model, optimizer, tictactoe, args)
+mctn.learn()

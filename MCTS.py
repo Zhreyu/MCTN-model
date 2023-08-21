@@ -1,11 +1,18 @@
-from Node import Node
 import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from tqdm.notebook import trange
+import random
+import math
 
 class MCTS:
-    def __init__(self, game, args):
+    def __init__(self, game, args, model):
         self.game = game
         self.args = args
+        self.model = model
         
+    @torch.no_grad()
     def search(self, state):
         root = Node(self.game, self.args, state)
         
@@ -19,8 +26,17 @@ class MCTS:
             value = self.game.get_opponent_value(value)
             
             if not is_terminal:
-                node = node.expand()
-                value = node.simulate()
+                policy, value = self.model(
+                    torch.tensor(self.game.get_encoded_state(node.state)).unsqueeze(0)
+                )
+                policy = torch.softmax(policy, axis=1).squeeze(0).cpu().numpy()
+                valid_moves = self.game.get_valid_moves(node.state)
+                policy *= valid_moves
+                policy /= np.sum(policy)
+                
+                value = value.item()
+                
+                node.expand(policy)
                 
             node.backpropagate(value)    
             
@@ -30,5 +46,3 @@ class MCTS:
             action_probs[child.action_taken] = child.visit_count
         action_probs /= np.sum(action_probs)
         return action_probs
-        
-        
