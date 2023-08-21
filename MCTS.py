@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from tqdm.notebook import trange
 import random
 import math
+from Node import Node
 
 class MCTS:
     def __init__(self, game, args, model):
